@@ -1,13 +1,16 @@
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
-const sqlite3 = require('sqlite3').verbose();
+const { Pool } = require('pg');
 const crypto = require('crypto');
 
 dotenv.config();
 
-const dbPath = process.env.DATABASE_URL?.replace('file:', '') || './dev.db';
-const db = new sqlite3.Database(dbPath);
+// PostgreSQL connection
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+});
 
 const app = express();
 
@@ -18,13 +21,13 @@ app.use(cors({
 app.use(express.json());
 
 // Helper function for database queries
-function query(sql, params = []) {
-  return new Promise((resolve, reject) => {
-    db.all(sql, params, (err, rows) => {
-      if (err) reject(err);
-      else resolve({ rows });
-    });
-  });
+async function query(sql, params = []) {
+  try {
+    const result = await pool.query(sql, params);
+    return { rows: result.rows };
+  } catch (error) {
+    throw error;
+  }
 }
 
 // Generate transaction reference
@@ -87,7 +90,7 @@ app.post('/api/payments/initialize', async (req, res) => {
     // Create transaction record
     await query(
       `INSERT INTO transactions (reference, customer_name, customer_phone, pass_type, amount, status)
-       VALUES (?, ?, ?, ?, ?, 'PENDING')`,
+       VALUES ($1, $2, $3, $4, $5, 'PENDING')`,
       [reference, customerName, customerPhone, passType, amount]
     );
 
@@ -128,9 +131,9 @@ app.post('/api/payments/simulate-complete', async (req, res) => {
 
     // Update transaction status
     const result = await query(
-      `UPDATE transactions 
-       SET status = 'PAID' 
-       WHERE reference = ? AND status = 'PENDING'
+      `UPDATE transactions
+       SET status = 'PAID'
+       WHERE reference = $1 AND status = 'PENDING'
        RETURNING id, reference, customer_name, pass_type, amount`,
       [reference]
     );
@@ -140,11 +143,11 @@ app.post('/api/payments/simulate-complete', async (req, res) => {
     }
 
     const transaction = result.rows[0];
-    
+
     // Generate ticket
     const ticketCode = generateTicketCode();
     const qrHash = generateQrHash(ticketCode);
-    
+
     const packageDetailsMap = {
       STANDARD: 'Standard Entry',
       REGULAR_VIP: 'VIP Bracelet — 3-Day Pass',
@@ -156,7 +159,7 @@ app.post('/api/payments/simulate-complete', async (req, res) => {
 
     await query(
       `INSERT INTO tickets (ticket_code, transaction_id, qr_hash, status, tier, price_fcfa, package_details)
-       VALUES (?, ?, ?, 'ISSUED', ?, ?, ?)`,
+       VALUES ($1, $2, $3, 'ISSUED', $4, $5, $6)`,
       [ticketCode, transaction.id, qrHash, transaction.pass_type, transaction.amount, packageDetails]
     );
 
@@ -188,7 +191,7 @@ app.post('/api/payments/webhook', async (req, res) => {
       const result = await query(
         `UPDATE transactions 
          SET status = 'PAID' 
-         WHERE (notchpay_trxref = ? OR reference = ?) AND status = 'PENDING'
+         WHERE (notchpay_trxref = $1 OR reference = $2) AND status = 'PENDING'
          RETURNING id, reference, customer_name, pass_type, amount`,
         [notchReference, notchReference]
       );
@@ -211,7 +214,7 @@ app.post('/api/payments/webhook', async (req, res) => {
 
         await query(
           `INSERT INTO tickets (ticket_code, transaction_id, qr_hash, status, tier, price_fcfa, package_details)
-           VALUES (?, ?, ?, 'ISSUED', ?, ?, ?)`,
+           VALUES ($1, $2, $3, 'ISSUED', $4, $5, $6)`,
           [ticketCode, transaction.id, qrHash, transaction.pass_type, transaction.amount, packageDetails]
         );
 
@@ -221,7 +224,7 @@ app.post('/api/payments/webhook', async (req, res) => {
       await query(
         `UPDATE transactions 
          SET status = 'FAILED' 
-         WHERE (notchpay_trxref = ? OR reference = ?) AND status = 'PENDING'`,
+         WHERE (notchpay_trxref = $1 OR reference = $2) AND status = 'PENDING'`,
         [notchReference, notchReference]
       );
     }
@@ -237,12 +240,12 @@ app.post('/api/payments/webhook', async (req, res) => {
 app.get('/api/payments/status/:ref', async (req, res) => {
   try {
     const { ref } = req.params;
-    
+
     const result = await query(
-      `SELECT t.status, tk.ticket_code 
+      `SELECT t.status, tk.ticket_code
        FROM transactions t
        LEFT JOIN tickets tk ON t.id = tk.transaction_id
-       WHERE t.reference = ?`,
+       WHERE t.reference = $1`,
       [ref]
     );
 
@@ -276,7 +279,7 @@ app.post('/api/tickets/retrieve', async (req, res) => {
         `SELECT t.*, tk.ticket_code, tk.qr_hash, tk.status as ticket_status, tk.tier, tk.price_fcfa, tk.package_details
          FROM transactions t
          JOIN tickets tk ON t.id = tk.transaction_id
-         WHERE tk.ticket_code = ? AND t.status = 'PAID'`,
+         WHERE tk.ticket_code = $1 AND t.status = 'PAID'`,
         [ticketCode]
       );
     } else {
@@ -285,7 +288,7 @@ app.post('/api/tickets/retrieve', async (req, res) => {
         `SELECT t.*, tk.ticket_code, tk.qr_hash, tk.status as ticket_status, tk.tier, tk.price_fcfa, tk.package_details
          FROM transactions t
          JOIN tickets tk ON t.id = tk.transaction_id
-         WHERE t.customer_phone = ? AND t.status = 'PAID'
+         WHERE t.customer_phone = $1 AND t.status = 'PAID'
          ORDER BY t.created_at DESC`,
         [customerPhone]
       );
@@ -312,7 +315,7 @@ app.post('/api/tickets/verify', async (req, res) => {
       `SELECT tk.*, t.customer_name, t.pass_type
        FROM tickets tk
        JOIN transactions t ON tk.transaction_id = t.id
-       WHERE tk.qr_hash = ?`,
+       WHERE tk.qr_hash = $1`,
       [qrHash]
     );
 
@@ -332,9 +335,9 @@ app.post('/api/tickets/verify', async (req, res) => {
 
     // Mark ticket as used
     await query(
-      `UPDATE tickets 
-       SET status = 'USED', scanned_at = strftime('%s', 'now'), scanned_by = 'bouncer'
-       WHERE id = ?`,
+      `UPDATE tickets
+       SET status = 'USED', scanned_at = CURRENT_TIMESTAMP, scanned_by = 'bouncer'
+       WHERE id = $1`,
       [ticket.id]
     );
 
