@@ -103,8 +103,9 @@ app.post('/api/payments/initialize', async (req, res) => {
       authorizationUrl: `${process.env.APP_URL || 'http://localhost:5173'}/payment-status?ref=${reference}`,
     });
   } catch (error) {
-    console.error('Payment initialization error:', error);
-    res.status(500).json({ error: 'Failed to initialize payment' });
+    console.error('Payment initialization error:', error.message);
+    console.error('Full error:', error);
+    res.status(500).json({ error: 'Failed to initialize payment', details: error.message });
   }
 });
 
