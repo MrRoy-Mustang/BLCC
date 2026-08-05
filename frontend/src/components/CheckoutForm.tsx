@@ -46,7 +46,8 @@ export default function CheckoutForm() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch('/api/payments/initialize', {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+      const res = await fetch(`${apiUrl}/api/payments/initialize`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ customerName, customerPhone, passType }),

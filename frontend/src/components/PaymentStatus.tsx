@@ -13,7 +13,8 @@ export default function PaymentStatus() {
     if (!ref) return;
     setSimulating(true);
     try {
-      const res = await fetch('/api/payments/simulate-complete', {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+      const res = await fetch(`${apiUrl}/api/payments/simulate-complete`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ reference: ref }),

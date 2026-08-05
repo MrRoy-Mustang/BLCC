@@ -16,7 +16,8 @@ export default function TicketView() {
     }
 
     // Fetch ticket data from backend
-    fetch(`/api/tickets/retrieve`, {
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+    fetch(`${apiUrl}/api/tickets/retrieve`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ ticketCode }),
