@@ -15,7 +15,7 @@ const pool = new Pool({
 const app = express();
 
 app.use(cors({
-  origin: process.env.APP_URL || 'http://localhost:5173',
+  origin: '*',
   credentials: true
 }));
 app.use(express.json());
