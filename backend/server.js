@@ -96,11 +96,33 @@ app.post('/api/payments/initialize', async (req, res) => {
 
     console.log('Transaction created successfully');
 
-    // For testing, redirect to frontend payment simulation page
-    // In production, this would call Notch Pay API and return real authorization URL
+    // Call Notch Pay API to initialize payment
+    const notchpayResponse = await fetch(`${process.env.NOTCHPAY_API_URL}/payments/initialize`, {
+      method: 'POST',
+      headers: {
+        'Authorization': process.env.NOTCHPAY_SECRET_KEY,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        amount: amount,
+        email: customerEmail,
+        name: customerName,
+        phone: customerPhone,
+        reference: reference,
+        currency: 'XAF',
+      }),
+    });
+
+    const notchpayData = await notchpayResponse.json();
+    console.log('Notch Pay response:', notchpayData);
+
+    if (!notchpayResponse.ok) {
+      throw new Error(`Notch Pay error: ${notchpayData.message || 'Unknown error'}`);
+    }
+
     res.json({
       reference,
-      authorizationUrl: `${process.env.APP_URL || 'http://localhost:5173'}/payment-status?ref=${reference}`,
+      authorizationUrl: notchpayData.authorization_url || notchpayData.link,
     });
   } catch (error) {
     console.error('Payment initialization error:', error.message);
