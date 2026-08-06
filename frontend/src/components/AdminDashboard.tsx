@@ -50,8 +50,7 @@ export default function AdminDashboard() {
   const [successMsg, setSuccessMsg] = useState('');
 
   useEffect(() => {
-    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
-    fetch(`${apiUrl}/api/admin/stats`)
+    fetch('/api/admin/stats')
       .then((r) => r.json())
       .then(setStats);
 
@@ -59,8 +58,7 @@ export default function AdminDashboard() {
   }, []);
 
   function loadBouncers() {
-    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
-    fetch(`${apiUrl}/api/admin/bouncers`)
+    fetch('/api/admin/bouncers')
       .then((r) => r.json())
       .then((data) => {
         if (data.bouncers) setBouncers(data.bouncers);
@@ -69,8 +67,7 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     const timeout = setTimeout(() => {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
-      fetch(`${apiUrl}/api/admin/transactions?q=${encodeURIComponent(query)}`)
+      fetch(`/api/admin/transactions?q=${encodeURIComponent(query)}`)
         .then((r) => r.json())
         .then((data) => setTransactions(data.transactions ?? []));
     }, 250);
@@ -87,8 +84,7 @@ export default function AdminDashboard() {
       return;
     }
 
-    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
-    const res = await fetch(`${apiUrl}/api/admin/bouncers`, {
+    const res = await fetch('/api/admin/bouncers', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name: bouncerName, pin: bouncerPin }),
@@ -108,8 +104,7 @@ export default function AdminDashboard() {
   async function handleDeleteBouncer(id: string, name: string) {
     if (!confirm(`Voulez-vous vraiment supprimer l'agent "${name}"?`)) return;
 
-    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
-    await fetch(`${apiUrl}/api/admin/bouncers`, {
+    await fetch('/api/admin/bouncers', {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id }),
@@ -126,7 +121,7 @@ export default function AdminDashboard() {
           <p className="text-xs text-forest/60">Gestion des ventes, statistiques &amp; accès des bouncers</p>
         </div>
         <a
-          href={`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/admin/export`}
+          href="/api/admin/export"
           className="rounded-lg border border-forest px-4 py-2 text-sm font-medium text-forest transition hover:bg-forest hover:text-cream"
         >
           Export CSV

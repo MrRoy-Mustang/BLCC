@@ -13,8 +13,7 @@ export default function PaymentStatus() {
     if (!ref) return;
     setSimulating(true);
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
-      const res = await fetch(`${apiUrl}/api/payments/simulate-complete`, {
+      const res = await fetch('/api/payments/simulate-complete', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ reference: ref }),
@@ -40,8 +39,7 @@ export default function PaymentStatus() {
     // Poll for payment status
     const interval = setInterval(async () => {
       try {
-        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
-        const res = await fetch(`${apiUrl}/api/payments/status/${ref}`);
+        const res = await fetch(`/api/payments/status/${ref}`);
         const data = await res.json();
         setStatus(data.status);
         if (data.ticketCode) setTicketCode(data.ticketCode);

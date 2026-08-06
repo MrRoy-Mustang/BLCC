@@ -14,8 +14,7 @@ export default function RetrieveTicket() {
     setError(null);
 
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
-      const res = await fetch(`${apiUrl}/api/tickets/retrieve`, {
+      const res = await fetch('/api/tickets/retrieve', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ customerPhone }),
