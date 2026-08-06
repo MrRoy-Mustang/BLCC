@@ -21,7 +21,8 @@ export default function BouncerConsole({ bouncerName }: { bouncerName?: string }
     setScanning(false);
 
     try {
-      const res = await fetch('/api/tickets/verify', {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+      const res = await fetch(`${apiUrl}/api/tickets/verify`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ qrHash }),
