@@ -100,7 +100,7 @@ app.post('/api/payments/initialize', async (req, res) => {
     const notchpayResponse = await fetch(`${process.env.NOTCHPAY_API_URL}/payments/initialize`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${process.env.NOTCHPAY_SECRET_KEY}`,
+        'Authorization': process.env.NOTCHPAY_SECRET_KEY,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
