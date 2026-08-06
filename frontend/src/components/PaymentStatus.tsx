@@ -75,13 +75,6 @@ export default function PaymentStatus() {
           <div className="w-16 h-16 border-4 border-[#1C3D27]/20 border-t-[#1C3D27] rounded-full animate-spin mx-auto mb-4" />
           <p className="text-[#1C3D27] font-semibold">Paiement en cours...</p>
           <p className="text-sm text-[#1C3D27]/60 mt-2">Veuillez compléter le paiement sur la page Notch Pay</p>
-          <button
-            onClick={handleSimulatePayment}
-            disabled={simulating}
-            className="mt-6 rounded-xl bg-amber-500 py-3 px-6 font-semibold text-white transition hover:bg-amber-600 disabled:opacity-50"
-          >
-            {simulating ? 'Simulation...' : 'Simuler Paiement (Test)'}
-          </button>
         </div>
       </div>
     );
