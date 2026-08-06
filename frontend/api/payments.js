@@ -19,77 +19,78 @@ function generateQrHash(ticketCode) {
 }
 
 export default async function handler(req, res) {
-  const { method, query: queryParams } = req;
-  const { action, ref } = queryParams;
-  
-  // Health check
-  if (method === 'GET' && !action && !ref) {
-    return res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
-  }
-
-  // Initialize payment
-  if (method === 'POST' && action === 'initialize') {
-    try {
-      const { customerName, customerPhone, passType } = req.body;
-
-      if (!customerName || !customerPhone || !passType) {
-        return res.status(400).json({ error: 'Missing required fields' });
-      }
-
-      const validPassTypes = ['STANDARD', 'REGULAR_VIP', 'CARRE_BRONZE', 'CARRE_OR', 'CARRE_DIAMANT'];
-      if (!validPassTypes.includes(passType)) {
-        return res.status(400).json({ error: 'Invalid pass type' });
-      }
-
-      const PRICES = {
-        STANDARD: 3000,
-        REGULAR_VIP: 8000,
-        CARRE_BRONZE: 50000,
-        CARRE_OR: 150000,
-        CARRE_DIAMANT: 250000,
-      };
-
-      const amount = PRICES[passType];
-      const reference = generateReference();
-      const customerEmail = `${customerPhone.replace(/[^0-9]/g, '')}@blcc.local`;
-
-      await query(
-        `INSERT INTO transactions (reference, customer_name, customer_phone, pass_type, amount, status)
-         VALUES ($1, $2, $3, $4, $5, 'PENDING')`,
-        [reference, customerName, customerPhone, passType, amount]
-      );
-
-      const notchpayResponse = await fetch(`${process.env.NOTCHPAY_API_URL}/payments/initialize`, {
-        method: 'POST',
-        headers: {
-          'Authorization': process.env.NOTCHPAY_PRIVATE_KEY,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          amount: amount,
-          email: customerEmail,
-          name: customerName,
-          phone: customerPhone,
-          reference: reference,
-          currency: 'XAF',
-        }),
-      });
-
-      const notchpayData = await notchpayResponse.json();
-
-      if (!notchpayResponse.ok) {
-        throw new Error(`Notch Pay error: ${notchpayData.message || 'Unknown error'}`);
-      }
-
-      return res.json({
-        reference,
-        authorizationUrl: notchpayData.authorization_url || notchpayData.link,
-      });
-    } catch (error) {
-      console.error('Payment initialization error:', error.message);
-      return res.status(500).json({ error: 'Failed to initialize payment', details: error.message });
+  try {
+    const { method, query: queryParams } = req;
+    const { action, ref } = queryParams;
+    
+    // Health check
+    if (method === 'GET' && !action && !ref) {
+      return res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
     }
-  }
+
+    // Initialize payment
+    if (method === 'POST' && action === 'initialize') {
+      try {
+        const { customerName, customerPhone, passType } = req.body;
+
+        if (!customerName || !customerPhone || !passType) {
+          return res.status(400).json({ error: 'Missing required fields' });
+        }
+
+        const validPassTypes = ['STANDARD', 'REGULAR_VIP', 'CARRE_BRONZE', 'CARRE_OR', 'CARRE_DIAMANT'];
+        if (!validPassTypes.includes(passType)) {
+          return res.status(400).json({ error: 'Invalid pass type' });
+        }
+
+        const PRICES = {
+          STANDARD: 3000,
+          REGULAR_VIP: 8000,
+          CARRE_BRONZE: 50000,
+          CARRE_OR: 150000,
+          CARRE_DIAMANT: 250000,
+        };
+
+        const amount = PRICES[passType];
+        const reference = generateReference();
+        const customerEmail = `${customerPhone.replace(/[^0-9]/g, '')}@blcc.local`;
+
+        await query(
+          `INSERT INTO transactions (reference, customer_name, customer_phone, pass_type, amount, status)
+           VALUES ($1, $2, $3, $4, $5, 'PENDING')`,
+          [reference, customerName, customerPhone, passType, amount]
+        );
+
+        const notchpayResponse = await fetch(`${process.env.NOTCHPAY_API_URL}/payments/initialize`, {
+          method: 'POST',
+          headers: {
+            'Authorization': process.env.NOTCHPAY_PRIVATE_KEY,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            amount: amount,
+            email: customerEmail,
+            name: customerName,
+            phone: customerPhone,
+            reference: reference,
+            currency: 'XAF',
+          }),
+        });
+
+        const notchpayData = await notchpayResponse.json();
+
+        if (!notchpayResponse.ok) {
+          throw new Error(`Notch Pay error: ${notchpayData.message || 'Unknown error'}`);
+        }
+
+        return res.json({
+          reference,
+          authorizationUrl: notchpayData.authorization_url || notchpayData.link,
+        });
+      } catch (error) {
+        console.error('Payment initialization error:', error.message);
+        return res.status(500).json({ error: 'Failed to initialize payment', details: error.message });
+      }
+    }
 
   // Payment callback
   if (method === 'GET' && action === 'callback' && ref) {
@@ -235,4 +236,8 @@ export default async function handler(req, res) {
   }
 
   return res.status(404).json({ error: 'Not found' });
+  } catch (error) {
+    console.error('Serverless function error:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
 }
