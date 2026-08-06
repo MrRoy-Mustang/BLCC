@@ -21,7 +21,7 @@ export default function BouncerConsole({ bouncerName }: { bouncerName?: string }
     setScanning(false);
 
     try {
-      const res = await fetch('/api/tickets/verify', {
+      const res = await fetch('/api/tickets?action=verify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ qrHash }),

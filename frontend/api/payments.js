@@ -20,15 +20,15 @@ function generateQrHash(ticketCode) {
 
 export default async function handler(req, res) {
   const { method, query: queryParams } = req;
-  const path = req.url?.split('?')[0] || '';
-
+  const { action, ref } = queryParams;
+  
   // Health check
-  if (path === '/api/health' && method === 'GET') {
+  if (method === 'GET' && !action && !ref) {
     return res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
   }
 
   // Initialize payment
-  if (path === '/api/payments/initialize' && method === 'POST') {
+  if (method === 'POST' && action === 'initialize') {
     try {
       const { customerName, customerPhone, passType } = req.body;
 
@@ -92,9 +92,7 @@ export default async function handler(req, res) {
   }
 
   // Payment callback
-  if (path === '/api/payments/callback' && method === 'GET') {
-    const { ref } = queryParams;
-    
+  if (method === 'GET' && action === 'callback' && ref) {
     if (!ref || typeof ref !== 'string') {
       return res.status(400).send('Invalid reference');
     }
@@ -104,7 +102,7 @@ export default async function handler(req, res) {
   }
 
   // Simulate payment completion
-  if (path === '/api/payments/simulate-complete' && method === 'POST') {
+  if (method === 'POST' && action === 'simulate-complete') {
     try {
       const { reference } = req.body;
 
@@ -155,10 +153,8 @@ export default async function handler(req, res) {
   }
 
   // Payment status check
-  if (path.startsWith('/api/payments/status/') && method === 'GET') {
+  if (method === 'GET' && action === 'status' && ref) {
     try {
-      const ref = path.split('/').pop();
-
       const result = await query(
         `SELECT t.status, tk.ticket_code
          FROM transactions t
@@ -182,7 +178,7 @@ export default async function handler(req, res) {
   }
 
   // Webhook
-  if (path === '/api/payments/webhook' && method === 'POST') {
+  if (method === 'POST' && action === 'webhook') {
     try {
       const { event, data } = req.body;
       const notchReference = data?.reference;

@@ -2,10 +2,10 @@ const { query } = require('./db');
 
 export default async function handler(req, res) {
   const { method, query: queryParams } = req;
-  const path = req.url?.split('?')[0] || '';
+  const { action } = queryParams;
 
   // Retrieve tickets
-  if (path === '/api/tickets/retrieve' && method === 'POST') {
+  if (method === 'POST' && action === 'retrieve') {
     try {
       const { customerPhone, ticketCode } = req.body;
 
@@ -41,7 +41,7 @@ export default async function handler(req, res) {
   }
 
   // Verify ticket
-  if (path === '/api/tickets/verify' && method === 'POST') {
+  if (method === 'POST' && action === 'verify') {
     try {
       const { qrHash } = req.body;
 

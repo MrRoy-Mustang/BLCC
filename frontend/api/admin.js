@@ -2,10 +2,10 @@ const { query } = require('./db');
 
 export default async function handler(req, res) {
   const { method, query: queryParams } = req;
-  const path = req.url?.split('?')[0] || '';
+  const { action } = queryParams;
 
   // Stats
-  if (path === '/api/admin/stats' && method === 'GET') {
+  if (method === 'GET' && action === 'stats') {
     try {
       const revenueResult = await query(
         `SELECT COALESCE(SUM(amount), 0) as total FROM transactions WHERE status = 'PAID'`
@@ -51,7 +51,7 @@ export default async function handler(req, res) {
   }
 
   // Bouncers
-  if (path === '/api/admin/bouncers') {
+  if (action === 'bouncers') {
     if (method === 'GET') {
       try {
         const result = await query(
@@ -102,7 +102,7 @@ export default async function handler(req, res) {
   }
 
   // Transactions
-  if (path === '/api/admin/transactions' && method === 'GET') {
+  if (method === 'GET' && action === 'transactions') {
     try {
       const { q } = queryParams;
       
@@ -146,7 +146,7 @@ export default async function handler(req, res) {
   }
 
   // Export
-  if (path === '/api/admin/export' && method === 'GET') {
+  if (method === 'GET' && action === 'export') {
     try {
       const result = await query(
         `SELECT t.reference, t.customer_name, t.customer_phone, t.pass_type, t.amount, t.status, t.created_at,

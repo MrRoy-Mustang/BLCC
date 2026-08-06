@@ -50,7 +50,7 @@ export default function AdminDashboard() {
   const [successMsg, setSuccessMsg] = useState('');
 
   useEffect(() => {
-    fetch('/api/admin/stats')
+    fetch('/api/admin?action=stats')
       .then((r) => r.json())
       .then(setStats);
 
@@ -58,7 +58,7 @@ export default function AdminDashboard() {
   }, []);
 
   function loadBouncers() {
-    fetch('/api/admin/bouncers')
+    fetch('/api/admin?action=bouncers')
       .then((r) => r.json())
       .then((data) => {
         if (data.bouncers) setBouncers(data.bouncers);
@@ -67,7 +67,7 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     const timeout = setTimeout(() => {
-      fetch(`/api/admin/transactions?q=${encodeURIComponent(query)}`)
+      fetch(`/api/admin?action=transactions&q=${encodeURIComponent(query)}`)
         .then((r) => r.json())
         .then((data) => setTransactions(data.transactions ?? []));
     }, 250);
@@ -84,7 +84,7 @@ export default function AdminDashboard() {
       return;
     }
 
-    const res = await fetch('/api/admin/bouncers', {
+    const res = await fetch('/api/admin?action=bouncers', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name: bouncerName, pin: bouncerPin }),
@@ -104,7 +104,7 @@ export default function AdminDashboard() {
   async function handleDeleteBouncer(id: string, name: string) {
     if (!confirm(`Voulez-vous vraiment supprimer l'agent "${name}"?`)) return;
 
-    await fetch('/api/admin/bouncers', {
+    await fetch('/api/admin?action=bouncers', {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id }),
@@ -121,7 +121,7 @@ export default function AdminDashboard() {
           <p className="text-xs text-forest/60">Gestion des ventes, statistiques &amp; accès des bouncers</p>
         </div>
         <a
-          href="/api/admin/export"
+          href="/api/admin?action=export"
           className="rounded-lg border border-forest px-4 py-2 text-sm font-medium text-forest transition hover:bg-forest hover:text-cream"
         >
           Export CSV

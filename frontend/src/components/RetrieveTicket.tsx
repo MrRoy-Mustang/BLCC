@@ -14,7 +14,7 @@ export default function RetrieveTicket() {
     setError(null);
 
     try {
-      const res = await fetch('/api/tickets/retrieve', {
+      const res = await fetch('/api/tickets?action=retrieve', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ customerPhone }),
