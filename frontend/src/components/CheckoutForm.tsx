@@ -15,7 +15,7 @@ const ENTRANCE_OPTIONS: { value: EntrancePass; label: string; price: number; bad
     label: 'Standard',
     price: 3000,
     badge: 'ENTRÉE',
-    perks: ['Accès 3 jours', '13-15 Août 2026'],
+    perks: ['13-15 Août 2026'],
   },
   {
     value: 'REGULAR_VIP',

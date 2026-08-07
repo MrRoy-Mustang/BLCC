@@ -24,7 +24,7 @@ const PACKS: {
     label: 'Bronze',
     sublabel: 'Pack Yannick Noah Bronze',
     price: 50000,
-    image: '/images/BRONZE.png',
+    image: '/50000FCFA.jpg',
     color: 'from-amber-900/20 to-amber-700/10',
     borderColor: 'rgba(205,127,50,0.5)',
     glowColor: 'rgba(205,127,50,0.15)',
@@ -35,7 +35,7 @@ const PACKS: {
     label: 'Or',
     sublabel: 'Pack Yannick Noah Or',
     price: 150000,
-    image: '/images/OR.png',
+    image: '/150000FCFA.jpg',
     color: 'from-yellow-600/20 to-yellow-400/10',
     borderColor: 'rgba(255,215,0,0.6)',
     glowColor: 'rgba(255,215,0,0.15)',
@@ -46,7 +46,7 @@ const PACKS: {
     label: 'Diamant',
     sublabel: 'Pack Yannick Noah Diamant',
     price: 250000,
-    image: '/images/DIAMANT.png',
+    image: '/250000FCFA.jpg',
     color: 'from-cyan-400/20 to-blue-300/10',
     borderColor: 'rgba(185,242,255,0.7)',
     glowColor: 'rgba(185,242,255,0.15)',
@@ -77,8 +77,7 @@ export default function CarreVipSection() {
     setLoading(true);
     setError(null);
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
-      const res = await fetch(`${apiUrl}/api/payments/initialize`, {
+      const res = await fetch('/api/payments?action=initialize', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ customerName, customerPhone, passType: selected }),
@@ -96,7 +95,7 @@ export default function CarreVipSection() {
   return (
     <div className="space-y-6">
       {/* Pack cards */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
         {PACKS.map((pack) => {
           const isSelected = selected === pack.value;
           return (
@@ -104,76 +103,84 @@ export default function CarreVipSection() {
               key={pack.value}
               type="button"
               onClick={() => setSelected(isSelected ? null : pack.value)}
-              className={`relative rounded-2xl text-left transition-all duration-300 overflow-hidden ${
-                isSelected ? 'scale-[1.03] shadow-2xl' : 'hover:scale-[1.01] shadow-md'
+              className={`relative rounded-3xl overflow-hidden transition-all duration-300 ${
+                isSelected ? 'scale-[1.02] shadow-2xl' : 'hover:scale-[1.01] shadow-lg'
               }`}
               style={{
-                background: 'linear-gradient(145deg, #0e0b07, #1a1408)',
-                border: `1.5px solid ${isSelected ? pack.borderColor : 'rgba(212,175,55,0.2)'}`,
-                boxShadow: isSelected ? `0 0 30px ${pack.glowColor}` : undefined,
+                background: isSelected ? 'linear-gradient(145deg, #1a1408, #0e0b07)' : '#ffffff',
+                border: isSelected ? `2px solid ${pack.borderColor}` : '1px solid rgba(0,0,0,0.1)',
+                boxShadow: isSelected ? `0 20px 60px ${pack.glowColor}` : '0 4px 20px rgba(0,0,0,0.08)',
               }}
             >
-              {/* Pack label top */}
-              <div className="p-5 pb-0">
-                <span
-                  className="inline-block rounded-full px-3 py-1 text-[10px] font-bold tracking-[0.25em] uppercase mb-2"
-                  style={{
-                    fontFamily: "'Georgia', serif",
-                    background: isSelected ? pack.borderColor : 'rgba(212,175,55,0.15)',
-                    color: isSelected ? '#0e0b07' : '#d4af37',
-                  }}
-                >
-                  {pack.label}
-                </span>
-                <p
-                  className="text-[11px] tracking-wide"
-                  style={{ fontFamily: "'Georgia', serif", color: 'rgba(245,224,112,0.55)' }}
-                >
-                  {pack.sublabel}
-                </p>
-              </div>
-
-              {/* Bottle image — fills frame with text overlay */}
-              <div className="relative h-32 overflow-hidden">
+              {/* Image section */}
+              <div className="relative h-48 overflow-hidden">
                 <img
                   src={pack.image}
                   alt={pack.label}
-                  className="absolute inset-0 w-full h-full object-cover"
-                  style={{ filter: isSelected ? 'none' : 'brightness(0.7) saturate(0.8)' }}
+                  className="w-full h-full object-cover transition-transform duration-500"
+                  style={{ 
+                    filter: isSelected ? 'none' : 'brightness(0.9)',
+                    transform: isSelected ? 'scale(1.05)' : 'scale(1)'
+                  }}
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
-                <div className="absolute bottom-0 left-0 right-0 p-3">
-                  <p className="text-white/90 text-xs font-semibold tracking-wider uppercase mb-1">
+                {isSelected && (
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+                )}
+                <div className="absolute top-3 right-3">
+                  <span
+                    className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider"
+                    style={{
+                      background: isSelected ? pack.borderColor : 'rgba(0,0,0,0.5)',
+                      color: isSelected ? '#0e0b07' : '#ffffff',
+                    }}
+                  >
                     {pack.label}
-                  </p>
-                  <p className="text-white/70 text-[10px]">
-                    {pack.sublabel}
-                  </p>
+                  </span>
                 </div>
               </div>
 
-              {/* Price + perks */}
-              <div className="px-4 pb-4">
+              {/* Content */}
+              <div className="p-5">
+                <h3
+                  className="text-lg font-bold mb-1"
+                  style={{ color: isSelected ? '#d4af37' : '#1a1408' }}
+                >
+                  {pack.sublabel}
+                </h3>
+                
                 <div
-                  className="text-xl font-bold mb-2"
+                  className="text-2xl font-bold mb-3"
                   style={{
-                    background: 'linear-gradient(180deg, #f5e070, #d4af37)',
+                    background: isSelected ? 'linear-gradient(180deg, #f5e070, #d4af37)' : 'linear-gradient(180deg, #1a1408, #0e0b07)',
                     WebkitBackgroundClip: 'text',
                     WebkitTextFillColor: 'transparent',
                   }}
                 >
                   {xaf(pack.price)}
                 </div>
-                <ul className="space-y-1">
+
+                <ul className="space-y-2 mb-4">
                   {pack.perks.map(p => (
-                    <li key={p} className="text-[11px] text-yellow-100/50 flex items-center gap-1">
-                      <span style={{ color: '#d4af37' }}>✓</span> {p}
+                    <li 
+                      key={p} 
+                      className="text-xs flex items-center gap-2"
+                      style={{ color: isSelected ? 'rgba(245,224,112,0.8)' : 'rgba(0,0,0,0.6)' }}
+                    >
+                      <span 
+                        className="w-1.5 h-1.5 rounded-full"
+                        style={{ backgroundColor: isSelected ? '#d4af37' : '#1a1408' }}
+                      />
+                      {p}
                     </li>
                   ))}
                 </ul>
+
                 {isSelected && (
-                  <div className="mt-3 text-center text-[11px] font-semibold tracking-wider" style={{ color: '#d4af37' }}>
-                    ● SÉLECTIONNÉ
+                  <div 
+                    className="text-center py-2 rounded-lg text-xs font-semibold tracking-wider"
+                    style={{ background: pack.borderColor, color: '#0e0b07' }}
+                  >
+                    SÉLECTIONNÉ
                   </div>
                 )}
               </div>
@@ -186,15 +193,15 @@ export default function CarreVipSection() {
       {selected && selectedPack && (
         <form
           onSubmit={handleSubmit}
-          className="rounded-2xl p-6 space-y-4 border border-forest/20 bg-white/60 shadow-ticket"
+          className="rounded-2xl p-6 space-y-4 border border-forest/20 bg-white/80 backdrop-blur-sm shadow-ticket"
         >
           <div className="flex items-center justify-between mb-2">
             <div>
-              <p className="font-semibold text-forest">Pack {selectedPack.label}</p>
-              <p className="text-xs text-forest/60">{selectedPack.sublabel}</p>
+              <p className="font-semibold text-forest text-lg">Pack {selectedPack.label}</p>
+              <p className="text-sm text-forest/60">{selectedPack.sublabel}</p>
             </div>
             <div className="text-right">
-              <p className="font-bold text-forest text-lg">{xaf(selectedPack.price)}</p>
+              <p className="font-bold text-forest text-xl">{xaf(selectedPack.price)}</p>
             </div>
           </div>
 
@@ -204,7 +211,7 @@ export default function CarreVipSection() {
               required
               value={customerName}
               onChange={(e) => setCustomerName(e.target.value)}
-              className="w-full rounded-lg border border-forest/20 bg-white px-4 py-3 outline-none focus:border-forest"
+              className="w-full rounded-lg border border-forest/20 bg-white px-4 py-3 outline-none focus:border-forest transition"
               placeholder="ex. Ngassa Roy"
             />
           </div>
@@ -216,7 +223,7 @@ export default function CarreVipSection() {
                 required
                 value={customerPhone}
                 onChange={handlePhoneChange}
-                className="w-full rounded-lg border border-forest/20 bg-white pl-12 pr-4 py-3 outline-none focus:border-forest"
+                className="w-full rounded-lg border border-forest/20 bg-white pl-12 pr-4 py-3 outline-none focus:border-forest transition"
                 placeholder="+237 6XX XXX XXX"
               />
             </div>
