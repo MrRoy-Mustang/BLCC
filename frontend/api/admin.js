@@ -1,4 +1,4 @@
-const { query } = require('./db');
+import { query } from './db.js';
 
 export default async function handler(req, res) {
   const { method, query: queryParams } = req;

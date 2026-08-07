@@ -1,5 +1,5 @@
-const { query } = require('./db');
-const crypto = require('crypto');
+import { query } from './db.js';
+import crypto from 'crypto';
 
 function generateReference() {
   return `BLCC-TX-${crypto.randomBytes(6).toString('hex').toUpperCase()}`;

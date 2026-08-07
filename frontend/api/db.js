@@ -1,4 +1,4 @@
-const { Pool } = require('pg');
+import { Pool } from 'pg';
 
 let pool;
 
@@ -22,4 +22,4 @@ async function query(sql, params = []) {
   }
 }
 
-module.exports = { query, getPool };
+export { query, getPool };
