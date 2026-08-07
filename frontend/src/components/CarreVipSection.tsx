@@ -14,10 +14,6 @@ const PACKS: {
   sublabel: string;
   price: number;
   image: string;
-  color: string;
-  borderColor: string;
-  glowColor: string;
-  perks: string[];
 }[] = [
   {
     value: 'CARRE_BRONZE',
@@ -25,10 +21,6 @@ const PACKS: {
     sublabel: 'Pack Yannick Noah Bronze',
     price: 50000,
     image: '/50000FCFA.jpg',
-    color: 'from-amber-900/20 to-amber-700/10',
-    borderColor: 'rgba(205,127,50,0.5)',
-    glowColor: 'rgba(205,127,50,0.15)',
-    perks: ['1 bouteille incluse', 'Table réservée', 'Accès Carré VIP'],
   },
   {
     value: 'CARRE_OR',
@@ -36,10 +28,6 @@ const PACKS: {
     sublabel: 'Pack Yannick Noah Or',
     price: 150000,
     image: '/150000FCFA.jpg',
-    color: 'from-yellow-600/20 to-yellow-400/10',
-    borderColor: 'rgba(255,215,0,0.6)',
-    glowColor: 'rgba(255,215,0,0.15)',
-    perks: ['2 bouteilles incluses', 'Table premium réservée', 'Accès Carré VIP', 'Service dédié'],
   },
   {
     value: 'CARRE_DIAMANT',
@@ -47,10 +35,6 @@ const PACKS: {
     sublabel: 'Pack Yannick Noah Diamant',
     price: 250000,
     image: '/250000FCFA.jpg',
-    color: 'from-cyan-400/20 to-blue-300/10',
-    borderColor: 'rgba(185,242,255,0.7)',
-    glowColor: 'rgba(185,242,255,0.15)',
-    perks: ['3 bouteilles incluses', 'Table VIP exclusive', 'Accès Carré VIP', 'Service dédié', 'Photo souvenir'],
   },
 ];
 
@@ -107,51 +91,37 @@ export default function CarreVipSection() {
                 isSelected ? 'scale-[1.02] shadow-2xl' : 'hover:scale-[1.01] shadow-lg'
               }`}
               style={{
-                background: isSelected ? 'linear-gradient(145deg, #1a1408, #0e0b07)' : '#ffffff',
-                border: isSelected ? `2px solid ${pack.borderColor}` : '1px solid rgba(0,0,0,0.1)',
-                boxShadow: isSelected ? `0 20px 60px ${pack.glowColor}` : '0 4px 20px rgba(0,0,0,0.08)',
+                background: '#ffffff',
+                border: isSelected ? '2px solid #d4af37' : '1px solid rgba(0,0,0,0.1)',
+                boxShadow: isSelected ? '0 20px 60px rgba(212,175,55,0.3)' : '0 4px 20px rgba(0,0,0,0.08)',
               }}
             >
-              {/* Image section */}
-              <div className="relative h-48 overflow-hidden">
+              {/* Image section - full image visible */}
+              <div className="relative overflow-hidden">
                 <img
                   src={pack.image}
                   alt={pack.label}
-                  className="w-full h-full object-cover transition-transform duration-500"
+                  className="w-full h-auto object-contain transition-transform duration-500"
                   style={{ 
                     filter: isSelected ? 'none' : 'brightness(0.9)',
-                    transform: isSelected ? 'scale(1.05)' : 'scale(1)'
+                    transform: isSelected ? 'scale(1.02)' : 'scale(1)'
                   }}
                 />
-                {isSelected && (
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-                )}
-                <div className="absolute top-3 right-3">
-                  <span
-                    className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider"
-                    style={{
-                      background: isSelected ? pack.borderColor : 'rgba(0,0,0,0.5)',
-                      color: isSelected ? '#0e0b07' : '#ffffff',
-                    }}
-                  >
-                    {pack.label}
-                  </span>
-                </div>
               </div>
 
-              {/* Content */}
-              <div className="p-5">
+              {/* Content - only price and label */}
+              <div className="p-4">
                 <h3
-                  className="text-lg font-bold mb-1"
-                  style={{ color: isSelected ? '#d4af37' : '#1a1408' }}
+                  className="text-base font-bold mb-2"
+                  style={{ color: '#1a1408' }}
                 >
                   {pack.sublabel}
                 </h3>
                 
                 <div
-                  className="text-2xl font-bold mb-3"
+                  className="text-xl font-bold"
                   style={{
-                    background: isSelected ? 'linear-gradient(180deg, #f5e070, #d4af37)' : 'linear-gradient(180deg, #1a1408, #0e0b07)',
+                    background: 'linear-gradient(180deg, #1a1408, #0e0b07)',
                     WebkitBackgroundClip: 'text',
                     WebkitTextFillColor: 'transparent',
                   }}
@@ -159,26 +129,10 @@ export default function CarreVipSection() {
                   {xaf(pack.price)}
                 </div>
 
-                <ul className="space-y-2 mb-4">
-                  {pack.perks.map(p => (
-                    <li 
-                      key={p} 
-                      className="text-xs flex items-center gap-2"
-                      style={{ color: isSelected ? 'rgba(245,224,112,0.8)' : 'rgba(0,0,0,0.6)' }}
-                    >
-                      <span 
-                        className="w-1.5 h-1.5 rounded-full"
-                        style={{ backgroundColor: isSelected ? '#d4af37' : '#1a1408' }}
-                      />
-                      {p}
-                    </li>
-                  ))}
-                </ul>
-
                 {isSelected && (
                   <div 
-                    className="text-center py-2 rounded-lg text-xs font-semibold tracking-wider"
-                    style={{ background: pack.borderColor, color: '#0e0b07' }}
+                    className="mt-3 text-center py-2 rounded-lg text-xs font-semibold tracking-wider"
+                    style={{ background: '#d4af37', color: '#0e0b07' }}
                   >
                     SÉLECTIONNÉ
                   </div>
